@@ -51,6 +51,8 @@ class ScrollablePositionedList extends StatefulWidget {
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.minCacheExtent,
+    this.resetTarget,
+    this.isSpecial = false,
   })  : assert(itemCount != null),
         assert(itemBuilder != null),
         itemPositionsNotifier = itemPositionsListener as ItemPositionsNotifier?,
@@ -78,6 +80,8 @@ class ScrollablePositionedList extends StatefulWidget {
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.minCacheExtent,
+    this.resetTarget,
+    this.isSpecial = false,
   })  : assert(itemCount != null),
         assert(itemBuilder != null),
         assert(separatorBuilder != null),
@@ -170,6 +174,12 @@ class ScrollablePositionedList extends StatefulWidget {
   /// in builds of widgets that would otherwise already be built in the
   /// cache extent.
   final double? minCacheExtent;
+
+  /// if is latest on last, reset primary target
+  final Function? resetTarget;
+
+  /// special list for chat
+  final bool isSpecial;
 
   @override
   State<StatefulWidget> createState() => _ScrollablePositionedListState();
@@ -335,6 +345,15 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isSpecial && primary.scrollController.hasClients) {
+      final offset = primary.scrollController.offset;
+      final minExtent = primary.scrollController.position.minScrollExtent;
+      if (offset == minExtent) {
+        primary.target = 0;
+        widget.resetTarget?.call();
+      } else
+        primary.target = widget.initialScrollIndex;
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         final cacheExtent = _cacheExtent(constraints);
