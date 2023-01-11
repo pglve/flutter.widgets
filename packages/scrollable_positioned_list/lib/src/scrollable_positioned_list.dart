@@ -282,6 +282,8 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
 
   var _animationController;
 
+  int lastItemCount = 0;
+
   @override
   void initState() {
     super.initState();
@@ -345,7 +347,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isSpecial && primary.scrollController.hasClients) {
+    if (widget.isSpecial && primary.scrollController.hasClients && lastItemCount > 0 && lastItemCount != widget.itemCount) {
       final offset = primary.scrollController.offset;
       final minExtent = primary.scrollController.position.minScrollExtent;
       if (offset == minExtent) {
@@ -354,6 +356,7 @@ class _ScrollablePositionedListState extends State<ScrollablePositionedList>
       } else
         primary.target = widget.initialScrollIndex;
     }
+    lastItemCount = widget.itemCount;
     return LayoutBuilder(
       builder: (context, constraints) {
         final cacheExtent = _cacheExtent(constraints);
